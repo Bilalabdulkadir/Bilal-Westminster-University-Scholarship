@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   FileText, Download, X, GraduationCap, 
   MapPin, Clock, CheckCircle, ExternalLink, Mail, Phone, Contact,
-  QrCode, Linkedin, Github, Twitter, Instagram, Link2
+  QrCode, Linkedin, Github, Twitter, Instagram, Link2, Sparkles, Printer
 } from 'lucide-react';
 import Navigation from './components/Navigation';
 import Overview from './components/Overview';
@@ -23,7 +23,18 @@ export default function App() {
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [qrType, setQrType] = useState<'vcard' | 'linkedin' | 'github' | 'twitter' | 'instagram'>('vcard');
   const [isGeneratingPdf, setIsGeneratingPdf] = useState<boolean>(false);
+  const [showPdfSuccessToast, setShowPdfSuccessToast] = useState<boolean>(false);
   const dossierRef = useRef<HTMLDivElement>(null);
+
+  // Auto-dismiss the PDF generation success toast after 10 seconds
+  React.useEffect(() => {
+    if (showPdfSuccessToast) {
+      const timer = setTimeout(() => {
+        setShowPdfSuccessToast(false);
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [showPdfSuccessToast]);
 
   // Quick navigation helpers cross-talking across modular borders
   const handleNavigateToContact = () => {
@@ -80,6 +91,7 @@ export default function App() {
       }
 
       pdf.save('bilal_muhammed_academic_dossier.pdf');
+      setShowPdfSuccessToast(true);
     } catch (err) {
       console.error('Error generating PDF:', err);
       // Fallback to legacy printer view if canvas fails due to browser container sandboxing limits
@@ -478,6 +490,69 @@ export default function App() {
       </AnimatePresence>
 
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+
+      {/* Dynamic PDF Success Toast with Print Optimization Advice */}
+      <AnimatePresence>
+        {showPdfSuccessToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95, y: 25 }}
+            transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+            className="fixed bottom-6 right-6 z-[9999] max-w-sm w-full bg-[#0f172a] text-white border border-slate-800 shadow-2xl p-4.5 overflow-hidden font-sans"
+            id="pdf-success-toast"
+          >
+            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-500 via-indigo-500 to-[#2563eb]" />
+            
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 h-9 w-9 bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                <CheckCircle className="w-5 h-5" />
+              </div>
+              
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-[11px] font-mono font-bold uppercase tracking-widest text-blue-400 flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+                    PDF Download Ready
+                  </h4>
+                  <button 
+                    onClick={() => setShowPdfSuccessToast(false)}
+                    className="text-slate-400 hover:text-white p-0.5 transition-colors cursor-pointer"
+                    id="close-toast-btn"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                
+                <p className="text-[11px] text-slate-200 mt-1.5 leading-relaxed">
+                  Your premium academic credentials dossier has been saved as <strong className="font-mono text-blue-300 font-semibold text-[10.5px]">bilal_muhammed_academic_dossier.pdf</strong>.
+                </p>
+
+                <div className="mt-4 border-t border-slate-800/80 pt-3 space-y-2">
+                  <div className="flex items-center gap-1.5 text-[9.5px] text-slate-400 font-mono font-bold uppercase tracking-widest">
+                    <Printer className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
+                    Optimal Print Settings:
+                  </div>
+                  <ul className="text-[10px] text-slate-300 space-y-2 font-sans">
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500 font-black mt-0.5 text-xs select-none">&bull;</span>
+                      <span>Set <span className="text-slate-300 font-mono font-semibold bg-slate-900 px-1 py-0.5 border border-slate-800 text-[9px]">Margins</span> to <strong>"None"</strong> to prevent white borders.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500 font-black mt-0.5 text-xs select-none">&bull;</span>
+                      <span>Check <strong>"Background graphics"</strong> to render the slate grids and off-white cards beautifully.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500 font-black mt-0.5 text-xs select-none">&bull;</span>
+                      <span>Target paper dimensions: <strong>A4 Standard</strong> at exactly <strong>100% Scale</strong>.</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
