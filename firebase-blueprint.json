@@ -1,0 +1,26 @@
+{
+  "entities": {
+    "UserSocials": {
+      "title": "UserSocials",
+      "description": "Customizable profile metadata storing social media links.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The unique user identifier matching Auth UID" },
+        "email": { "type": "string", "description": "The email of the registered user" },
+        "linkedin": { "type": "string", "description": "LinkedIn profile URL or handle" },
+        "github": { "type": "string", "description": "GitHub profile URL or handle" },
+        "twitter": { "type": "string", "description": "Twitter/X profile URL or handle" },
+        "other": { "type": "string", "description": "Any other social network or custom url" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Update timestamp" }
+      },
+      "required": ["id", "email"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserSocials",
+      "description": "User social connections and credentials doc"
+    }
+  }
+}
